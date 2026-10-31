@@ -1,11 +1,9 @@
-<!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<!DOCTYPE html><html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>راسلني | RASALNI</title>
-
-<style>
+<meta name="theme-color" content="#087f68">
+<title>راسلني | RASALNI</title><style>
 * {
   box-sizing: border-box;
 }
@@ -18,7 +16,7 @@ body {
 }
 
 header {
-  background: linear-gradient(135deg, #075c49, #10a37f);
+  background: #087f68;
   color: white;
   padding: 28px 15px;
   text-align: center;
@@ -62,134 +60,137 @@ input {
 }
 
 input:focus {
-  border-color: #10a37f;
+  border-color: #087f68;
 }
 
 button {
-  background: #087f5b;
-  color: white;
+  width: 100%;
+  padding: 13px;
+  margin-top: 9px;
   border: none;
-  padding: 13px 17px;
-  margin: 5px 2px;
   border-radius: 10px;
-  font-size: 15px;
+  background: #087f68;
+  color: white;
+  font-size: 16px;
   cursor: pointer;
 }
 
-button:active {
-  opacity: 0.8;
+button.secondary {
+  background: #647875;
 }
 
-.secondary {
-  background: #e8f5f0;
-  color: #087f5b;
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 #status {
   text-align: center;
-  color: #087f5b;
-  line-height: 1.7;
+  margin-top: 15px;
+  color: #087f68;
+  font-weight: bold;
 }
 
 .person {
-  background: #f5faf8;
-  padding: 13px;
-  margin: 10px 0;
-  border-radius: 12px;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-}
-
-.person h3 {
-  margin: 0;
+  gap: 12px;
+  padding: 12px;
+  margin-top: 10px;
+  background: #f1f7f5;
+  border-radius: 12px;
 }
 
 .avatar {
-  background: #d5f3e8;
-  color: #087f5b;
-  width: 42px;
-  height: 42px;
+  width: 45px;
+  height: 45px;
   border-radius: 50%;
+  background: #d9eee8;
   display: flex;
-  justify-content: center;
   align-items: center;
+  justify-content: center;
   font-size: 22px;
 }
 
-.hidden {
-  display: none;
+.person h3 {
+  flex: 1;
+  margin: 0;
+}
+
+.person button {
+  width: auto;
+  margin: 0;
+  padding: 9px;
+  font-size: 13px;
 }
 
 .note {
-  color: #71817c;
-  font-size: 13px;
-  text-align: center;
+  color: #687b76;
+  line-height: 1.8;
 }
-</style>
-</head>
 
-<body>
+footer {
+  text-align: center;
+  padding: 20px;
+  color: #687b76;
+}
+</style></head><body><header>
+  <h1>راسلني ❤️</h1>
+  <p>تواصل مع من تحب بسهولة</p>
+</header><div class="container">  <div class="box">
+    <h2>👤 حسابك</h2><input
+  id="name"
+  type="text"
+  placeholder="اسمك"
+>
 
-<header>
-  <h1>💬 راسلني</h1>
-  <p>تواصل مع العالم 🌍</p>
-</header>
+<input
+  id="email"
+  type="email"
+  placeholder="البريد الإلكتروني"
+>
 
-<div class="container">
+<input
+  id="password"
+  type="password"
+  placeholder="كلمة المرور"
+>
 
-  <div class="box">
-    <h2>👤 حسابك الشخصي</h2>
+<button onclick="registerRasalni()">
+  إنشاء حساب
+</button>
 
-    <input id="name" type="text"
-    placeholder="اسمك">
+<button onclick="loginRasalni()">
+  تسجيل الدخول
+</button>
 
-    <input id="email" type="email"
-    placeholder="البريد الإلكتروني">
+<button class="secondary" onclick="logoutRasalni()">
+  تسجيل الخروج
+</button>
 
-    <input id="password" type="password"
-    placeholder="كلمة المرور">
+<p id="status">أهلاً بك في راسلني ❤️</p>
 
-    <button onclick="registerRasalni()">
-      إنشاء حساب
-    </button>
+  </div>  <div class="box">
+    <h2>🔎 البحث عن الأشخاص</h2><input
+  id="userSearch"
+  type="text"
+  placeholder="اكتب اسم الشخص الذي تبحث عنه"
+>
 
-    <button onclick="loginRasalni()">
-      تسجيل الدخول
-    </button>
+<button onclick="searchUsers()">
+  بحث
+</button>
 
-    <button class="secondary"
-    onclick="logoutRasalni()">
-      تسجيل الخروج
-    </button>
+<div id="userResults"></div>
 
-    <p id="status">أهلاً بك في راسلني ❤️</p>
-  </div>
-
-  <div class="box">
-    <h2>🔎 البحث عن الأشخاص</h2>
-
-    <input id="userSearch" type="text"
-    placeholder="اكتب اسم الشخص الذي تبحث عنه">
-
-    <button onclick="searchUsers()">
-      بحث
-    </button>
-
-    <div id="userResults"></div>
-  </div>
-
-  <div class="box">
+  </div>  <div class="box">
     <h2>💬 المحادثات</h2>
     <p class="note">
-      ستظهر محادثاتك الحقيقية هنا بعد ربط نظام الرسائل.
+      ستظهر محادثاتك هنا بعد إضافة نظام الرسائل الحقيقي.
     </p>
-  </div>
-
-</div>
-
-<script type="module">
+  </div></div><footer>
+  RASALNI © 2026
+</footer><script type="module">
 
 import { initializeApp } from
 "https://www.gstatic.com/firebasejs/12.5.0/firebase-app.js";
@@ -224,6 +225,7 @@ const firebaseConfig = {
   appId: "1:858417361425:web:fd17c72032bb7ad38777b0",
   measurementId: "G-S9QDP73215"
 };
+
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
@@ -285,7 +287,9 @@ window.registerRasalni = async function() {
     alert("تم إنشاء حسابك بنجاح ❤️");
 
   } catch(error) {
+
     alert("تعذر إنشاء الحساب: " + error.message);
+
   }
 };
 
@@ -311,7 +315,9 @@ window.loginRasalni = async function() {
     alert("مرحبًا بك في راسلني ❤️");
 
   } catch(error) {
+
     alert("تعذر تسجيل الدخول: " + error.message);
+
   }
 };
 
@@ -319,11 +325,14 @@ window.loginRasalni = async function() {
 window.logoutRasalni = async function() {
 
   try {
+
     await signOut(auth);
     alert("تم تسجيل الخروج");
 
   } catch(error) {
+
     alert("حدث خطأ: " + error.message);
+
   }
 };
 
@@ -382,8 +391,7 @@ window.searchUsers = async function() {
         personName.textContent = name;
 
         const startButton = document.createElement("button");
-        startButton.textContent = "قريبًا: مراسلة";
-
+        startButton.textContent = "المراسلة قريبًا";
         startButton.disabled = true;
 
         person.appendChild(avatar);
@@ -418,10 +426,14 @@ onAuthStateChanged(auth, async user => {
       "مرحبًا بك! أنت مسجل الدخول ❤️";
 
     try {
+
       await createProfile(user);
+
     } catch(error) {
+
       status.innerText = "تعذر تحديث الملف الشخصي";
       console.error(error);
+
     }
 
   } else {
@@ -432,9 +444,8 @@ onAuthStateChanged(auth, async user => {
 
 });
 
+
 console.log("RASALNI Firebase Ready!");
 
-</script>
-
-</body>
+</script></body>
   </html>
