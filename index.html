@@ -1,397 +1,440 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ar" dir="rtl">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>راسلني | RASALNI</title>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>راسلني | RASALNI</title>
 
-    <style>
-      * {
-        box-sizing: border-box;
+<style>
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #eef3f5;
+  color: #18332e;
+}
+
+header {
+  background: linear-gradient(135deg, #075c49, #10a37f);
+  color: white;
+  padding: 28px 15px;
+  text-align: center;
+}
+
+header h1 {
+  margin: 0;
+  font-size: 32px;
+}
+
+header p {
+  margin-bottom: 0;
+}
+
+.container {
+  max-width: 600px;
+  margin: 20px auto;
+  padding: 0 12px;
+}
+
+.box {
+  background: white;
+  padding: 20px;
+  margin-bottom: 15px;
+  border-radius: 16px;
+  box-shadow: 0 4px 15px #0000000c;
+}
+
+h2, h3 {
+  margin-top: 0;
+}
+
+input {
+  width: 100%;
+  padding: 14px;
+  margin: 7px 0;
+  border: 1px solid #dce5e2;
+  border-radius: 10px;
+  font-size: 16px;
+  outline: none;
+}
+
+input:focus {
+  border-color: #10a37f;
+}
+
+button {
+  background: #087f5b;
+  color: white;
+  border: none;
+  padding: 13px 17px;
+  margin: 5px 2px;
+  border-radius: 10px;
+  font-size: 15px;
+  cursor: pointer;
+}
+
+button:active {
+  opacity: 0.8;
+}
+
+.secondary {
+  background: #e8f5f0;
+  color: #087f5b;
+}
+
+#status {
+  text-align: center;
+  color: #087f5b;
+  line-height: 1.7;
+}
+
+.person {
+  background: #f5faf8;
+  padding: 13px;
+  margin: 10px 0;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.person h3 {
+  margin: 0;
+}
+
+.avatar {
+  background: #d5f3e8;
+  color: #087f5b;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 22px;
+}
+
+.hidden {
+  display: none;
+}
+
+.note {
+  color: #71817c;
+  font-size: 13px;
+  text-align: center;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <h1>💬 راسلني</h1>
+  <p>تواصل مع العالم 🌍</p>
+</header>
+
+<div class="container">
+
+  <div class="box">
+    <h2>👤 حسابك الشخصي</h2>
+
+    <input id="name" type="text"
+    placeholder="اسمك">
+
+    <input id="email" type="email"
+    placeholder="البريد الإلكتروني">
+
+    <input id="password" type="password"
+    placeholder="كلمة المرور">
+
+    <button onclick="registerRasalni()">
+      إنشاء حساب
+    </button>
+
+    <button onclick="loginRasalni()">
+      تسجيل الدخول
+    </button>
+
+    <button class="secondary"
+    onclick="logoutRasalni()">
+      تسجيل الخروج
+    </button>
+
+    <p id="status">أهلاً بك في راسلني ❤️</p>
+  </div>
+
+  <div class="box">
+    <h2>🔎 البحث عن الأشخاص</h2>
+
+    <input id="userSearch" type="text"
+    placeholder="اكتب اسم الشخص الذي تبحث عنه">
+
+    <button onclick="searchUsers()">
+      بحث
+    </button>
+
+    <div id="userResults"></div>
+  </div>
+
+  <div class="box">
+    <h2>💬 المحادثات</h2>
+    <p class="note">
+      ستظهر محادثاتك الحقيقية هنا بعد ربط نظام الرسائل.
+    </p>
+  </div>
+
+</div>
+
+<script type="module">
+
+import { initializeApp } from
+"https://www.gstatic.com/firebasejs/12.5.0/firebase-app.js";
+
+import {
+  getAuth,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  signOut,
+  onAuthStateChanged
+} from
+"https://www.gstatic.com/firebasejs/12.5.0/firebase-auth.js";
+
+import {
+  getFirestore,
+  doc,
+  getDoc,
+  setDoc,
+  serverTimestamp,
+  collection,
+  getDocs
+} from
+"https://www.gstatic.com/firebasejs/12.5.0/firebase-firestore.js";
+
+
+const firebaseConfig = {
+  apiKey: "AIzaSyAq7r9GQ_djYy1Qh0Pj0XYooju5zw3SQOI",
+  authDomain: "rasalni-fb5bb.firebaseapp.com",
+  projectId: "rasalni-fb5bb",
+  storageBucket: "rasalni-fb5bb.firebasestorage.app",
+  messagingSenderId: "858417361425",
+  appId: "1:858417361425:web:fd17c72032bb7ad38777b0",
+  measurementId: "G-S9QDP73215"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+
+async function createProfile(user, name) {
+
+  const userRef = doc(db, "users", user.uid);
+  const profileRef = doc(db, "publicProfiles", user.uid);
+
+  await setDoc(userRef, {
+    email: user.email
+  }, { merge: true });
+
+  const profileSnapshot = await getDoc(profileRef);
+
+  if (!profileSnapshot.exists()) {
+
+    await setDoc(profileRef, {
+      displayName: name || user.email.split("@")[0],
+      createdAt: serverTimestamp()
+    });
+
+  } else if (name && name.trim()) {
+
+    await setDoc(profileRef, {
+      displayName: name.trim()
+    }, { merge: true });
+
+  }
+}
+
+
+window.registerRasalni = async function() {
+
+  const name = document.getElementById("name").value.trim();
+  const email = document.getElementById("email").value.trim();
+  const password = document.getElementById("password").value;
+
+  if (!name || !email || !password) {
+    alert("يرجى كتابة الاسم والبريد الإلكتروني وكلمة المرور");
+    return;
+  }
+
+  if (password.length < 6) {
+    alert("يجب أن تتكون كلمة المرور من 6 أحرف على الأقل");
+    return;
+  }
+
+  try {
+
+    const result = await createUserWithEmailAndPassword(
+      auth, email, password
+    );
+
+    await createProfile(result.user, name);
+
+    alert("تم إنشاء حسابك بنجاح ❤️");
+
+  } catch(error) {
+    alert("تعذر إنشاء الحساب: " + error.message);
+  }
+};
+
+
+window.loginRasalni = async function() {
+
+  const email = document.getElementById("email").value.trim();
+  const password = document.getElementById("password").value;
+
+  if (!email || !password) {
+    alert("اكتب البريد الإلكتروني وكلمة المرور");
+    return;
+  }
+
+  try {
+
+    const result = await signInWithEmailAndPassword(
+      auth, email, password
+    );
+
+    await createProfile(result.user);
+
+    alert("مرحبًا بك في راسلني ❤️");
+
+  } catch(error) {
+    alert("تعذر تسجيل الدخول: " + error.message);
+  }
+};
+
+
+window.logoutRasalni = async function() {
+
+  try {
+    await signOut(auth);
+    alert("تم تسجيل الخروج");
+
+  } catch(error) {
+    alert("حدث خطأ: " + error.message);
+  }
+};
+
+
+window.searchUsers = async function() {
+
+  const searchValue = document
+    .getElementById("userSearch")
+    .value.trim();
+
+  const results = document.getElementById("userResults");
+
+  results.innerHTML = "";
+
+  if (!auth.currentUser) {
+    results.innerText = "سجل الدخول أولاً";
+    return;
+  }
+
+  if (!searchValue) {
+    results.innerText = "اكتب اسم الشخص الذي تبحث عنه";
+    return;
+  }
+
+  results.innerText = "جارٍ البحث...";
+
+  try {
+
+    const profilesRef = collection(db, "publicProfiles");
+    const snapshot = await getDocs(profilesRef);
+
+    results.innerHTML = "";
+
+    let found = 0;
+
+    snapshot.forEach(item => {
+
+      const profile = item.data();
+      const name = profile.displayName || "";
+
+      if (
+        name.toLowerCase().includes(searchValue.toLowerCase()) &&
+        item.id !== auth.currentUser.uid
+      ) {
+
+        found++;
+
+        const person = document.createElement("div");
+        person.className = "person";
+
+        const avatar = document.createElement("div");
+        avatar.className = "avatar";
+        avatar.textContent = "👤";
+
+        const personName = document.createElement("h3");
+        personName.textContent = name;
+
+        const startButton = document.createElement("button");
+        startButton.textContent = "قريبًا: مراسلة";
+
+        startButton.disabled = true;
+
+        person.appendChild(avatar);
+        person.appendChild(personName);
+        person.appendChild(startButton);
+
+        results.appendChild(person);
       }
 
-      body {
-        margin: 0;
-        font-family: Arial, sans-serif;
-        background: #eef3f5;
-        color: #18332e;
-      }
-
-      header {
-        background: linear-gradient(135deg, #075c49, #10a37f);
-        color: white;
-        padding: 28px 15px;
-        text-align: center;
-      }
-
-      header h1 {
-        margin: 0;
-        font-size: 32px;
-      }
-
-      header p {
-        margin-bottom: 0;
-      }
-
-      .container {
-        max-width: 600px;
-        margin: 20px auto;
-        padding: 0 12px;
-      }
-
-      .box {
-        background: white;
-        padding: 20px;
-        margin-bottom: 15px;
-        border-radius: 16px;
-        box-shadow: 0 4px 15px #0000000c;
-      }
-
-      h2,
-      h3 {
-        margin-top: 0;
-      }
-
-      input {
-        width: 100%;
-        padding: 14px;
-        margin: 7px 0;
-        border: 1px solid #dce5e2;
-        border-radius: 10px;
-        font-size: 16px;
-        outline: none;
-      }
-
-      input:focus {
-        border-color: #10a37f;
-      }
-
-      button {
-        background: #087f5b;
-        color: white;
-        border: none;
-        padding: 13px 17px;
-        margin: 5px 2px;
-        border-radius: 10px;
-        font-size: 15px;
-        cursor: pointer;
-      }
-
-      button:active {
-        opacity: 0.8;
-      }
-
-      .secondary {
-        background: #e8f5f0;
-        color: #087f5b;
-      }
-
-      #status {
-        text-align: center;
-        color: #087f5b;
-        line-height: 1.7;
-      }
-
-      .person {
-        background: #f5faf8;
-        padding: 13px;
-        margin: 10px 0;
-        border-radius: 12px;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 8px;
-      }
-
-      .person h3 {
-        margin: 0;
-      }
-
-      .avatar {
-        background: #d5f3e8;
-        color: #087f5b;
-        width: 42px;
-        height: 42px;
-        border-radius: 50%;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        font-size: 22px;
-      }
-
-      .hidden {
-        display: none;
-      }
-
-      .note {
-        color: #71817c;
-        font-size: 13px;
-        text-align: center;
-      }
-    </style>
-  </head>
-
-  <body>
-    <header>
-      <h1>💬 راسلني</h1>
-      <p>تواصل مع العالم 🌍</p>
-    </header>
-
-    <div class="container">
-      <div class="box">
-        <h2>👤 حسابك الشخصي</h2>
-
-        <input id="name" type="text" placeholder="اسمك" />
-
-        <input id="email" type="email" placeholder="البريد الإلكتروني" />
-
-        <input id="password" type="password" placeholder="كلمة المرور" />
-
-        <button onclick="registerRasalni()">إنشاء حساب</button>
-
-        <button onclick="loginRasalni()">تسجيل الدخول</button>
-
-        <button class="secondary" onclick="logoutRasalni()">
-          تسجيل الخروج
-        </button>
-
-        <p id="status">أهلاً بك في راسلني ❤️</p>
-      </div>
-
-      <div class="box">
-        <h2>🔎 البحث عن الأشخاص</h2>
-
-        <input
-          id="userSearch"
-          type="text"
-          placeholder="اكتب اسم الشخص الذي تبحث عنه"
-        />
-
-        <button onclick="searchUsers()">بحث</button>
-
-        <div id="userResults"></div>
-      </div>
-
-      <div class="box">
-        <h2>💬 المحادثات</h2>
-        <p class="note">ستظهر محادثاتك الحقيقية هنا بعد ربط نظام الرسائل.</p>
-      </div>
-    </div>
-
-    <script type="module">
-      import { initializeApp } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-app.js";
-
-      import {
-        getAuth,
-        createUserWithEmailAndPassword,
-        signInWithEmailAndPassword,
-        signOut,
-        onAuthStateChanged,
-      } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-auth.js";
-
-      import {
-        getFirestore,
-        doc,
-        getDoc,
-        setDoc,
-        serverTimestamp,
-        collection,
-        getDocs,
-      } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-firestore.js";
-
-      const firebaseConfig = {
-        apiKey: "AIzaSyAq7r9GQ_djYy1Qh0Pj0XYooju5zw3SQOI",
-        authDomain: "rasalni-fb5bb.firebaseapp.com",
-        projectId: "rasalni-fb5bb",
-        storageBucket: "rasalni-fb5bb.firebasestorage.app",
-        messagingSenderId: "858417361425",
-        appId: "1:858417361425:web:fd17c72032bb7ad38777b0",
-        measurementId: "G-S9QDP73215",
-      };
-
-      const app = initializeApp(firebaseConfig);
-      const auth = getAuth(app);
-      const db = getFirestore(app);
-
-      async function createProfile(user, name) {
-        const userRef = doc(db, "users", user.uid);
-        const profileRef = doc(db, "publicProfiles", user.uid);
-
-        await setDoc(
-          userRef,
-          {
-            email: user.email,
-          },
-          { merge: true },
-        );
-
-        const profileSnapshot = await getDoc(profileRef);
-
-        if (!profileSnapshot.exists()) {
-          await setDoc(profileRef, {
-            displayName: name || user.email.split("@")[0],
-            createdAt: serverTimestamp(),
-          });
-        } else if (name && name.trim()) {
-          await setDoc(
-            profileRef,
-            {
-              displayName: name.trim(),
-            },
-            { merge: true },
-          );
-        }
-      }
-
-      window.registerRasalni = async function () {
-        const name = document.getElementById("name").value.trim();
-        const email = document.getElementById("email").value.trim();
-        const password = document.getElementById("password").value;
-
-        if (!name || !email || !password) {
-          alert("يرجى كتابة الاسم والبريد الإلكتروني وكلمة المرور");
-          return;
-        }
-
-        if (password.length < 6) {
-          alert("يجب أن تتكون كلمة المرور من 6 أحرف على الأقل");
-          return;
-        }
-
-        try {
-          const result = await createUserWithEmailAndPassword(
-            auth,
-            email,
-            password,
-          );
-
-          await createProfile(result.user, name);
-
-          alert("تم إنشاء حسابك بنجاح ❤️");
-        } catch (error) {
-          alert("تعذر إنشاء الحساب: " + error.message);
-        }
-      };
-
-      window.loginRasalni = async function () {
-        const email = document.getElementById("email").value.trim();
-        const password = document.getElementById("password").value;
-
-        if (!email || !password) {
-          alert("اكتب البريد الإلكتروني وكلمة المرور");
-          return;
-        }
-
-        try {
-          const result = await signInWithEmailAndPassword(
-            auth,
-            email,
-            password,
-          );
-
-          await createProfile(result.user);
-
-          alert("مرحبًا بك في راسلني ❤️");
-        } catch (error) {
-          alert("تعذر تسجيل الدخول: " + error.message);
-        }
-      };
-
-      window.logoutRasalni = async function () {
-        try {
-          await signOut(auth);
-          alert("تم تسجيل الخروج");
-        } catch (error) {
-          alert("حدث خطأ: " + error.message);
-        }
-      };
-
-      window.searchUsers = async function () {
-        const searchValue = document.getElementById("userSearch").value.trim();
-
-        const results = document.getElementById("userResults");
-
-        results.innerHTML = "";
-
-        if (!auth.currentUser) {
-          results.innerText = "سجل الدخول أولاً";
-          return;
-        }
-
-        if (!searchValue) {
-          results.innerText = "اكتب اسم الشخص الذي تبحث عنه";
-          return;
-        }
-
-        results.innerText = "جارٍ البحث...";
-
-        try {
-          const profilesRef = collection(db, "publicProfiles");
-          const snapshot = await getDocs(profilesRef);
-
-          results.innerHTML = "";
-
-          let found = 0;
-
-          snapshot.forEach((item) => {
-            const profile = item.data();
-            const name = profile.displayName || "";
-
-            if (
-              name.toLowerCase().includes(searchValue.toLowerCase()) &&
-              item.id !== auth.currentUser.uid
-            ) {
-              found++;
-
-              const person = document.createElement("div");
-              person.className = "person";
-
-              const avatar = document.createElement("div");
-              avatar.className = "avatar";
-              avatar.textContent = "👤";
-
-              const personName = document.createElement("h3");
-              personName.textContent = name;
-
-              const startButton = document.createElement("button");
-              startButton.textContent = "قريبًا: مراسلة";
-
-              startButton.disabled = true;
-
-              person.appendChild(avatar);
-              person.appendChild(personName);
-              person.appendChild(startButton);
-
-              results.appendChild(person);
-            }
-          });
-
-          if (found === 0) {
-            results.innerText = "لم يتم العثور على هذا الشخص";
-          }
-        } catch (error) {
-          results.innerText = "حدث خطأ أثناء البحث: " + error.message;
-        }
-      };
-
-      onAuthStateChanged(auth, async (user) => {
-        const status = document.getElementById("status");
-
-        if (user) {
-          status.innerText = "مرحبًا بك! أنت مسجل الدخول ❤️";
-
-          try {
-            await createProfile(user);
-          } catch (error) {
-            status.innerText = "تعذر تحديث الملف الشخصي";
-            console.error(error);
-          }
-        } else {
-          status.innerText = "أنت غير مسجل الدخول";
-        }
-      });
-
-      console.log("RASALNI Firebase Ready!");
-    </script>
-  </body>
-</html>
+    });
+
+    if (found === 0) {
+      results.innerText = "لم يتم العثور على هذا الشخص";
+    }
+
+  } catch(error) {
+
+    results.innerText =
+      "حدث خطأ أثناء البحث: " + error.message;
+
+  }
+};
+
+
+onAuthStateChanged(auth, async user => {
+
+  const status = document.getElementById("status");
+
+  if (user) {
+
+    status.innerText =
+      "مرحبًا بك! أنت مسجل الدخول ❤️";
+
+    try {
+      await createProfile(user);
+    } catch(error) {
+      status.innerText = "تعذر تحديث الملف الشخصي";
+      console.error(error);
+    }
+
+  } else {
+
+    status.innerText = "أنت غير مسجل الدخول";
+
+  }
+
+});
+
+console.log("RASALNI Firebase Ready!");
+
+</script>
+
+</body>
+  </html>
